@@ -14,14 +14,7 @@ import (
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
-	tracesdk "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
-)
-
-const (
-	service     = "trace-demo"
-	environment = "production"
-	id          = 1
 )
 
 func main() {
@@ -101,17 +94,18 @@ func newResource() *resource.Resource {
 	return r
 }
 
-func tracerProvider(url string) (*tracesdk.TracerProvider, error) {
+// Trace provider with jaeger exporter
+func tracerProvider(url string) (*trace.TracerProvider, error) {
 	// Create the Jaeger exporter
 	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(url)))
 	if err != nil {
 		return nil, err
 	}
-	tp := tracesdk.NewTracerProvider(
+	tp := trace.NewTracerProvider(
 		// Always be sure to batch in production.
-		tracesdk.WithBatcher(exp),
+		trace.WithBatcher(exp),
 		// Record information about this application in a Resource.
-		tracesdk.WithResource(newResource()),
+		trace.WithResource(newResource()),
 	)
 	return tp, nil
 }
